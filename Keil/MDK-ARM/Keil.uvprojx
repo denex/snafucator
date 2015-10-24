@@ -373,7 +373,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;  ../Drivers/CMSIS/Include;  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc;../Drivers/CMSIS/Include;../Drivers/CMSIS/Device/ST/STM32F4xx/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -501,6 +501,9 @@
               <FilePath>../Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c</FilePath>
             </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>::CMSIS</GroupName>
         </Group>
         <Group>
           <GroupName>Application/MDK-ARM</GroupName>
@@ -897,9 +900,6 @@
               <FilePath>../Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c</FilePath>
             </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
     </Target>

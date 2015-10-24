@@ -35,7 +35,7 @@
 #include "usb_device.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "usbd_hid.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -91,7 +91,7 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+		//USBD_HID_SendReport(hUsbDeviceFS, );
   }
   /* USER CODE END 3 */
 
