@@ -35,7 +35,8 @@
 #include "usb_device.h"
 
 /* USER CODE BEGIN Includes */
-#include "usbd_hid.h"
+#include "stm32f4_discovery.h"
+#include "tm_stm32f4_usb_hid_device.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -57,6 +58,9 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
+#define KEY_PRESSED 		0x01
+#define KEY_NOT_PRESSED 0x00
 
 /* USER CODE END 0 */
 
@@ -81,17 +85,57 @@ int main(void)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN 2 */
-
-  /* USER CODE END 2 */
+	
+	TM_USB_HIDDEVICE_Keyboard_t Keyboard;
+	
+	/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	
   while (1)
   {
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-		//USBD_HID_SendReport(hUsbDeviceFS, );
+		BSP_LED_Init(LED_GREEN);
+    BSP_LED_Init(LED_ORANGE);
+    BSP_LED_Init(LED_RED);
+    BSP_LED_Init(LED_BLUE);
+
+		/* Waiting USER Button is Pressed */
+    while (BSP_PB_GetState(BUTTON_KEY) == KEY_NOT_PRESSED)
+    {
+			BSP_LED_Toggle(LED_GREEN);
+			HAL_Delay(25);
+			BSP_LED_Toggle(LED_ORANGE);
+			HAL_Delay(25);
+			BSP_LED_Toggle(LED_RED);
+			HAL_Delay(25);
+			BSP_LED_Toggle(LED_BLUE);
+			HAL_Delay(25);
+		}
+		BSP_LED_On(LED_GREEN);
+		BSP_LED_Off(LED_ORANGE);
+    BSP_LED_Off(LED_RED);
+    BSP_LED_Off(LED_BLUE);
+
+		/* Set default values for keyboard struct */
+		TM_USB_HIDDEVICE_KeyboardStructInit(&Keyboard);
+		
+		/* Set pressed keys = WIN + R */
+		Keyboard.L_GUI = TM_USB_HIDDEVICE_Button_Pressed;    /* Win button */
+		Keyboard.Key1 = 0x15;                                 /* R */
+		/* Result = "Run" command */
+						 
+		/* Send keyboard report */
+		TM_USB_HIDDEVICE_KeyboardSend(&Keyboard);
+		BSP_LED_On(LED_ORANGE);
+		HAL_Delay(250);
+		BSP_LED_On(LED_RED);
+		/* Release all buttons */
+		TM_USB_HIDDEVICE_KeyboardReleaseAll();
+		BSP_LED_On(LED_BLUE);
   }
   /* USER CODE END 3 */
 
