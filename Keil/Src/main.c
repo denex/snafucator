@@ -72,16 +72,24 @@ void fail()
 
 void waitForUserButtonPressed()
 {
+		uint32_t const delay = 100;
 	  /* Waiting USER Button is Pressed */
     while (BSP_PB_GetState(BUTTON_KEY) == KEY_NOT_PRESSED) {
-			BSP_LED_Toggle(LED_GREEN);
-			HAL_Delay(25);
-			BSP_LED_Toggle(LED_ORANGE);
-			HAL_Delay(25);
-			BSP_LED_Toggle(LED_RED);
-			HAL_Delay(25);
-			BSP_LED_Toggle(LED_BLUE);
-			HAL_Delay(25);
+			BSP_LED_On(LED_GREEN);
+			HAL_Delay(delay);
+			BSP_LED_Off(LED_GREEN);
+			
+			BSP_LED_On(LED_ORANGE);
+			HAL_Delay(delay);
+			BSP_LED_Off(LED_ORANGE);
+			
+			BSP_LED_On(LED_RED);
+			HAL_Delay(delay);
+			BSP_LED_Off(LED_RED);
+			
+			BSP_LED_On(LED_BLUE);
+			HAL_Delay(delay);
+			BSP_LED_Off(LED_BLUE);
 		}
 }
 
@@ -90,27 +98,27 @@ void waitForUserButtonReleased()
 	BSP_LED_Off(LED_GREEN);
 	BSP_LED_Off(LED_ORANGE);
   BSP_LED_Off(LED_RED);
-  BSP_LED_Off(LED_BLUE);
 	while (BSP_PB_GetState(BUTTON_KEY) == KEY_PRESSED) {
 		BSP_LED_Toggle(LED_BLUE);
 		HAL_Delay(25);
 	}
+	BSP_LED_Off(LED_BLUE);
 }
 
-void sendKeyboardNumber(uint8_t numberOrEnter, uint32_t timeout)
+uint8_t sendKeyboardChar(uint8_t aChar, uint32_t timeout)
 {
 	uint8_t key_code = 0xFF;
-	if (numberOrEnter >= 1 && numberOrEnter <=9) {
-		key_code = 0x1D + numberOrEnter;
-	} else if (numberOrEnter == 0) {
-		key_code = 0x1D + 10;
-	} else if (numberOrEnter == 0x0E) {
+	if (aChar >='1' && aChar <='9') {
+		key_code = aChar - 19;
+	} else if (aChar == '0') {
+		key_code = 0x27;
+	} else if (aChar == '\n' || aChar == '\r') {
 		// Enter
-		key_code = 0x1D + 11;
+		key_code = 0x28;
 	}
 	if (key_code == 0xFF) {
 		fail();
-		return;
+		return key_code;
 	}
 	TM_USB_HIDDEVICE_Keyboard_t Keyboard;
 	/* Set default values for keyboard struct */
@@ -122,17 +130,13 @@ void sendKeyboardNumber(uint8_t numberOrEnter, uint32_t timeout)
 	/* Release all buttons */
 	TM_USB_HIDDEVICE_KeyboardReleaseAll();
 	BSP_LED_Off(LED_ORANGE);
+	return aChar;
 }
 
 /* USER CODE END 0 */
 
 int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -146,32 +150,40 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
 
-  /* USER CODE BEGIN 2 */
+  /* USER CODE BEGIN */
 	BSP_LED_Init(LED_GREEN);
   BSP_LED_Init(LED_ORANGE);
   BSP_LED_Init(LED_RED);
   BSP_LED_Init(LED_BLUE);
-	/* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-	
-  while (1)
-  {
-  /* USER CODE END WHILE */
+	const uint8_t RX_BUFFER_SIZE = 4;
+	uint8_t aRxBuffer[RX_BUFFER_SIZE];
 
-  /* USER CODE BEGIN 3 */
-
+  /* Infinite loop */	
+  while (1) {
 		waitForUserButtonPressed();
 		waitForUserButtonReleased();
 		
-		BSP_LED_On(LED_GREEN);
-		/* Send keyboard report */
-		sendKeyboardNumber(0x0E, 100);
-		BSP_LED_Off(LED_GREEN);
-  }
-  /* USER CODE END 3 */
-
+		while (1) {
+			BSP_LED_On(LED_GREEN);
+			if (HAL_UART_Receive(&huart2, (uint8_t *)aRxBuffer, RX_BUFFER_SIZE, HAL_MAX_DELAY) != HAL_OK) {
+				fail();
+				break;
+			}
+			BSP_LED_Off(LED_GREEN);
+			
+			BSP_LED_On(LED_ORANGE);
+			
+			/* Send keyboard report */
+			uint8_t sended = sendKeyboardChar(aRxBuffer[2], 100);
+			
+			if (HAL_UART_Transmit(&huart2, &sended, sizeof(sended), 1000) != HAL_OK) {
+				fail();
+				break;
+			}
+			BSP_LED_Off(LED_ORANGE);
+		}
+	}
 }
 
 /** System Clock Configuration
