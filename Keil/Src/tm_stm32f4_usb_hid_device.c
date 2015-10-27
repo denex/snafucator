@@ -42,7 +42,7 @@ TM_USB_HIDDEVICE_Status_t TM_USB_HIDDEVICE_KeyboardStructInit(TM_USB_HIDDEVICE_K
 }
 
 TM_USB_HIDDEVICE_Status_t TM_USB_HIDDEVICE_KeyboardSend(TM_USB_HIDDEVICE_Keyboard_t* Keyboard_Data) {
-	uint8_t buff[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};; /* 9 bytes long report */
+	uint8_t buff[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; /* 9 bytes long report */
 	
 	/* Report ID */
 	buff[0] = 0x01; /* Keyboard */

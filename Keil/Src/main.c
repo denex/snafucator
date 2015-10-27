@@ -62,6 +62,68 @@ static void MX_USART2_UART_Init(void);
 #define KEY_PRESSED 		0x01
 #define KEY_NOT_PRESSED 0x00
 
+void fail()
+{
+	while (1) {
+		BSP_LED_Toggle(LED_RED);
+		HAL_Delay(500);
+	}
+}
+
+void waitForUserButtonPressed()
+{
+	  /* Waiting USER Button is Pressed */
+    while (BSP_PB_GetState(BUTTON_KEY) == KEY_NOT_PRESSED) {
+			BSP_LED_Toggle(LED_GREEN);
+			HAL_Delay(25);
+			BSP_LED_Toggle(LED_ORANGE);
+			HAL_Delay(25);
+			BSP_LED_Toggle(LED_RED);
+			HAL_Delay(25);
+			BSP_LED_Toggle(LED_BLUE);
+			HAL_Delay(25);
+		}
+}
+
+void waitForUserButtonReleased()
+{
+	BSP_LED_Off(LED_GREEN);
+	BSP_LED_Off(LED_ORANGE);
+  BSP_LED_Off(LED_RED);
+  BSP_LED_Off(LED_BLUE);
+	while (BSP_PB_GetState(BUTTON_KEY) == KEY_PRESSED) {
+		BSP_LED_Toggle(LED_BLUE);
+		HAL_Delay(25);
+	}
+}
+
+void sendKeyboardNumber(uint8_t numberOrEnter, uint32_t timeout)
+{
+	uint8_t key_code = 0xFF;
+	if (numberOrEnter >= 1 && numberOrEnter <=9) {
+		key_code = 0x1D + numberOrEnter;
+	} else if (numberOrEnter == 0) {
+		key_code = 0x1D + 10;
+	} else if (numberOrEnter == 0x0E) {
+		// Enter
+		key_code = 0x1D + 11;
+	}
+	if (key_code == 0xFF) {
+		fail();
+		return;
+	}
+	TM_USB_HIDDEVICE_Keyboard_t Keyboard;
+	/* Set default values for keyboard struct */
+	TM_USB_HIDDEVICE_KeyboardStructInit(&Keyboard);
+	Keyboard.Key1 = key_code;
+	TM_USB_HIDDEVICE_KeyboardSend(&Keyboard);
+	BSP_LED_On(LED_ORANGE);
+	HAL_Delay(timeout);
+	/* Release all buttons */
+	TM_USB_HIDDEVICE_KeyboardReleaseAll();
+	BSP_LED_Off(LED_ORANGE);
+}
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -85,9 +147,10 @@ int main(void)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN 2 */
-	
-	TM_USB_HIDDEVICE_Keyboard_t Keyboard;
-	
+	BSP_LED_Init(LED_GREEN);
+  BSP_LED_Init(LED_ORANGE);
+  BSP_LED_Init(LED_RED);
+  BSP_LED_Init(LED_BLUE);
 	/* USER CODE END 2 */
 
   /* Infinite loop */
@@ -98,44 +161,14 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-		BSP_LED_Init(LED_GREEN);
-    BSP_LED_Init(LED_ORANGE);
-    BSP_LED_Init(LED_RED);
-    BSP_LED_Init(LED_BLUE);
 
-		/* Waiting USER Button is Pressed */
-    while (BSP_PB_GetState(BUTTON_KEY) == KEY_NOT_PRESSED)
-    {
-			BSP_LED_Toggle(LED_GREEN);
-			HAL_Delay(25);
-			BSP_LED_Toggle(LED_ORANGE);
-			HAL_Delay(25);
-			BSP_LED_Toggle(LED_RED);
-			HAL_Delay(25);
-			BSP_LED_Toggle(LED_BLUE);
-			HAL_Delay(25);
-		}
-		BSP_LED_On(LED_GREEN);
-		BSP_LED_Off(LED_ORANGE);
-    BSP_LED_Off(LED_RED);
-    BSP_LED_Off(LED_BLUE);
-
-		/* Set default values for keyboard struct */
-		TM_USB_HIDDEVICE_KeyboardStructInit(&Keyboard);
+		waitForUserButtonPressed();
+		waitForUserButtonReleased();
 		
-		/* Set pressed keys = WIN + R */
-		Keyboard.L_GUI = TM_USB_HIDDEVICE_Button_Pressed;    /* Win button */
-		Keyboard.Key1 = 0x15;                                 /* R */
-		/* Result = "Run" command */
-						 
+		BSP_LED_On(LED_GREEN);
 		/* Send keyboard report */
-		TM_USB_HIDDEVICE_KeyboardSend(&Keyboard);
-		BSP_LED_On(LED_ORANGE);
-		HAL_Delay(250);
-		BSP_LED_On(LED_RED);
-		/* Release all buttons */
-		TM_USB_HIDDEVICE_KeyboardReleaseAll();
-		BSP_LED_On(LED_BLUE);
+		sendKeyboardNumber(0x0E, 100);
+		BSP_LED_Off(LED_GREEN);
   }
   /* USER CODE END 3 */
 
