@@ -56,18 +56,18 @@
 /** @defgroup USBD_DESC_Private_Defines
   * @{
   */ 
-#define USBD_VID     0x2047
-#define USBD_LANGID_STRING     1033
+#define USBD_VID                     0x2047
+#define USBD_LANGID_STRING           1033
 #define USBD_MANUFACTURER_STRING     "STMicroelectronics"
-#define USBD_PID_FS     0x0401
-#define USBD_PRODUCT_STRING_FS     "STM32 Keyboard"
+#define USBD_PID_FS                  0x0401
+#define USBD_PRODUCT_STRING_FS       "STM32 Keyboard"
 /* USER CODE BEGIN SERIALNUMBER_STRING_FS */
-#define USBD_SERIALNUMBER_STRING_FS     "0000000000DA"
+#define USBD_SERIALNUMBER_STRING_FS  "000000000DA4"
 /* USER CODE END SERIALNUMBER_STRING_FS */
-#define USBD_CONFIGURATION_STRING_FS     "HID Config"
+#define USBD_CONFIGURATION_STRING_FS "HID Config"
 #define USBD_INTERFACE_STRING_FS     "HID Interface"
 
-#define USB_SIZ_BOS_DESC            0x0C
+#define USB_SIZ_BOS_DESC             0x0C
 
 /**
   * @}

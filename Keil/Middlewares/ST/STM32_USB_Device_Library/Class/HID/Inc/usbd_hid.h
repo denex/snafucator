@@ -52,10 +52,6 @@
 #define HID_EPIN_ADDR                 0x81
 #define HID_EPIN_SIZE                 0x04
 
-#define USB_HID_CONFIG_DESC_SIZ       34
-#define USB_HID_DESC_SIZ              9
-#define HID_KEYBOARD_REPORT_DESC_SIZE 47
-
 #define HID_DESCRIPTOR_TYPE           0x21
 #define HID_REPORT_DESC               0x22
 

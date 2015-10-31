@@ -132,7 +132,13 @@ uint8_t sendKeyboardChar(uint8_t aChar, uint32_t timeout)
 	BSP_LED_Off(LED_ORANGE);
 	return aChar;
 }
-
+typedef struct
+{
+	uint8_t FirstByte;
+	uint8_t Char;
+	uint8_t ThirdByte;
+	uint8_t ForthByte;
+} TRX_DATA;
 /* USER CODE END 0 */
 
 int main(void)
@@ -151,38 +157,42 @@ int main(void)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN */
+	TRX_DATA aRxBuffer;
 	BSP_LED_Init(LED_GREEN);
   BSP_LED_Init(LED_ORANGE);
   BSP_LED_Init(LED_RED);
   BSP_LED_Init(LED_BLUE);
-
-	const uint8_t RX_BUFFER_SIZE = 4;
-	uint8_t aRxBuffer[RX_BUFFER_SIZE];
 
   /* Infinite loop */	
   while (1) {
 		waitForUserButtonPressed();
 		waitForUserButtonReleased();
 		
-		while (1) {
-			BSP_LED_On(LED_GREEN);
-			if (HAL_UART_Receive(&huart2, (uint8_t *)aRxBuffer, RX_BUFFER_SIZE, HAL_MAX_DELAY) != HAL_OK) {
-				fail();
-				break;
-			}
-			BSP_LED_Off(LED_GREEN);
-			
-			BSP_LED_On(LED_ORANGE);
-			
-			/* Send keyboard report */
-			uint8_t sended = sendKeyboardChar(aRxBuffer[2], 100);
-			
-			if (HAL_UART_Transmit(&huart2, &sended, sizeof(sended), 1000) != HAL_OK) {
-				fail();
-				break;
-			}
-			BSP_LED_Off(LED_ORANGE);
-		}
+		sendKeyboardChar('1', 100);
+//		while (1) {
+//			BSP_LED_On(LED_GREEN);
+//			if (HAL_UART_Receive(&huart2, (uint8_t *)&aRxBuffer, sizeof(aRxBuffer), HAL_MAX_DELAY) != HAL_OK) {
+//				fail();
+//				break;
+//			}
+//			BSP_LED_Off(LED_GREEN);
+//			if (aRxBuffer.FirstByte != '0' || 
+//				  aRxBuffer.ThirdByte != '0' || 
+//					aRxBuffer.ForthByte != '0') {
+//				fail();
+//				break;
+//			}
+//			BSP_LED_On(LED_ORANGE);
+//			
+//			/* Send keyboard report */
+//			uint8_t sended = sendKeyboardChar(aRxBuffer.Char, 100);
+//			
+//			if (HAL_UART_Transmit(&huart2, &sended, sizeof(sended), 1000) != HAL_OK) {
+//				fail();
+//				break;
+//			}
+//			BSP_LED_Off(LED_ORANGE);
+//		}
 	}
 }
 
