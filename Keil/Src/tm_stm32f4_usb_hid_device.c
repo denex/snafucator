@@ -42,32 +42,32 @@ TM_USB_HIDDEVICE_Status_t TM_USB_HIDDEVICE_KeyboardStructInit(TM_USB_HIDDEVICE_K
 }
 
 TM_USB_HIDDEVICE_Status_t TM_USB_HIDDEVICE_KeyboardSend(TM_USB_HIDDEVICE_Keyboard_t* Keyboard_Data) {
-	uint8_t buff[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; /* 9 bytes long report */
+	uint8_t buff[8] = {0, 0, 0, 0, 0, 0, 0, 0}; /* 8 bytes long report */
 	
 	/* Report ID */
-	buff[0] = 0x01; /* Keyboard */
+	//buff[0] = 0x01; /* Keyboard */
 	
 	/* Control buttons */
-	buff[1] = 0;
-	buff[1] |= Keyboard_Data->L_CTRL 	<< 0;	/* Bit 0 */
-	buff[1] |= Keyboard_Data->L_SHIFT << 1;	/* Bit 1 */
-	buff[1] |= Keyboard_Data->L_ALT 	<< 2;	/* Bit 2 */
-	buff[1] |= Keyboard_Data->L_GUI 	<< 3;	/* Bit 3 */
-	buff[1] |= Keyboard_Data->R_CTRL 	<< 4;	/* Bit 4 */
-	buff[1] |= Keyboard_Data->R_SHIFT << 5;	/* Bit 5 */
-	buff[1] |= Keyboard_Data->R_ALT 	<< 6;	/* Bit 6 */
-	buff[1] |= Keyboard_Data->R_GUI 	<< 7;	/* Bit 7 */
+	buff[0] = 0;
+	buff[0] |= Keyboard_Data->L_CTRL 	<< 0;	/* Bit 0 */
+	buff[0] |= Keyboard_Data->L_SHIFT << 1;	/* Bit 1 */
+	buff[0] |= Keyboard_Data->L_ALT 	<< 2;	/* Bit 2 */
+	buff[0] |= Keyboard_Data->L_GUI 	<< 3;	/* Bit 3 */
+	buff[0] |= Keyboard_Data->R_CTRL 	<< 4;	/* Bit 4 */
+	buff[0] |= Keyboard_Data->R_SHIFT << 5;	/* Bit 5 */
+	buff[0] |= Keyboard_Data->R_ALT 	<< 6;	/* Bit 6 */
+	buff[0] |= Keyboard_Data->R_GUI 	<< 7;	/* Bit 7 */
 	
 	/* Padding */
-	buff[2] = 0x00;
+	buff[1] = 0x00;
 	
 	/* Keys */
-	buff[3] = Keyboard_Data->Key1;
-	buff[4] = Keyboard_Data->Key2;
-	buff[5] = Keyboard_Data->Key3;
-	buff[6] = Keyboard_Data->Key4;
-	buff[7] = Keyboard_Data->Key5;
-	buff[8] = Keyboard_Data->Key6;
+	buff[2] = Keyboard_Data->Key1;
+	buff[3] = Keyboard_Data->Key2;
+	buff[4] = Keyboard_Data->Key3;
+	buff[5] = Keyboard_Data->Key4;
+	buff[6] = Keyboard_Data->Key5;
+	buff[7] = Keyboard_Data->Key6;
 	
 	/* Send to USB */
 	USBD_HID_SendReport(&hUsbDeviceFS, buff, sizeof(buff));
@@ -77,10 +77,10 @@ TM_USB_HIDDEVICE_Status_t TM_USB_HIDDEVICE_KeyboardSend(TM_USB_HIDDEVICE_Keyboar
 }
 
 TM_USB_HIDDEVICE_Status_t TM_USB_HIDDEVICE_KeyboardReleaseAll(void) {
-	uint8_t buff[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; /* 9 bytes long report */
+	uint8_t buff[8] = {0, 0, 0, 0, 0, 0, 0, 0}; /* 8 bytes long report */
 	
 	/* Report ID */
-	buff[0] = 0x01; /* Keyboard */
+	//buff[0] = 0x01; /* Keyboard */
 	
 	/* Send to USB */
 	USBD_HID_SendReport(&hUsbDeviceFS, buff, sizeof(buff));
