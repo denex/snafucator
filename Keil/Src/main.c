@@ -62,14 +62,6 @@ static void MX_USART2_UART_Init(void);
 #define KEY_PRESSED 		0x01
 #define KEY_NOT_PRESSED 0x00
 
-void fail()
-{
-	while (1) {
-		BSP_LED_Toggle(LED_RED);
-		HAL_Delay(500);
-	}
-}
-
 void waitForUserButtonPressed()
 {
 		uint32_t const delay = 100;
@@ -105,6 +97,20 @@ void waitForUserButtonReleased()
 	BSP_LED_Off(LED_BLUE);
 }
 
+void fail(uint32_t loopCount)
+{
+	BSP_LED_Off(LED_RED);
+	while (loopCount --> 0) {
+		BSP_LED_Toggle(LED_RED);
+		HAL_Delay(500);
+	}
+	BSP_LED_On(LED_RED);
+  HAL_Delay(1000);
+	waitForUserButtonPressed();
+	waitForUserButtonReleased();
+	BSP_LED_Off(LED_RED);
+}
+
 uint8_t sendKeyboardChar(uint8_t aChar, uint32_t timeout)
 {
 	uint8_t key_code = 0xFF;
@@ -117,7 +123,7 @@ uint8_t sendKeyboardChar(uint8_t aChar, uint32_t timeout)
 		key_code = 0x28;
 	}
 	if (key_code == 0xFF) {
-		fail();
+		fail(8);
 		return key_code;
 	}
 	TM_USB_HIDDEVICE_Keyboard_t Keyboard;
@@ -165,34 +171,31 @@ int main(void)
 
   /* Infinite loop */	
   while (1) {
-		waitForUserButtonPressed();
-		waitForUserButtonReleased();
 		
-		sendKeyboardChar('1', 100);
-//		while (1) {
-//			BSP_LED_On(LED_GREEN);
-//			if (HAL_UART_Receive(&huart2, (uint8_t *)&aRxBuffer, sizeof(aRxBuffer), HAL_MAX_DELAY) != HAL_OK) {
-//				fail();
-//				break;
-//			}
-//			BSP_LED_Off(LED_GREEN);
-//			if (aRxBuffer.FirstByte != '0' || 
-//				  aRxBuffer.ThirdByte != '0' || 
-//					aRxBuffer.ForthByte != '0') {
-//				fail();
-//				break;
-//			}
-//			BSP_LED_On(LED_ORANGE);
-//			
-//			/* Send keyboard report */
-//			uint8_t sended = sendKeyboardChar(aRxBuffer.Char, 100);
-//			
-//			if (HAL_UART_Transmit(&huart2, &sended, sizeof(sended), 1000) != HAL_OK) {
-//				fail();
-//				break;
-//			}
-//			BSP_LED_Off(LED_ORANGE);
-//		}
+		while (1) {
+			BSP_LED_On(LED_GREEN);
+			if (HAL_UART_Receive(&huart2, (uint8_t *)&aRxBuffer, sizeof(aRxBuffer), HAL_MAX_DELAY) != HAL_OK) {
+				fail(1);
+				break;
+			}
+			BSP_LED_Off(LED_GREEN);
+			if (aRxBuffer.FirstByte != '0' || 
+				  aRxBuffer.ThirdByte != '0' || 
+					aRxBuffer.ForthByte != '0') {
+				fail(3);
+				break;
+			}
+			BSP_LED_On(LED_ORANGE);
+			
+			/* Send keyboard report */
+			uint8_t sended = sendKeyboardChar(aRxBuffer.Char, 100);
+			
+			if (HAL_UART_Transmit(&huart2, &sended, sizeof(sended), 1000) != HAL_OK) {
+				fail(5);
+				break;
+			}
+			BSP_LED_Off(LED_ORANGE);
+		}
 	}
 }
 

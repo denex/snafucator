@@ -50,11 +50,11 @@ TM_USB_HIDDEVICE_Status_t TM_USB_HIDDEVICE_KeyboardSend(TM_USB_HIDDEVICE_Keyboar
 	/* Control buttons */
 	buff[0] = 0;
 	buff[0] |= Keyboard_Data->L_CTRL 	<< 0;	/* Bit 0 */
-	buff[0] |= Keyboard_Data->L_SHIFT << 1;	/* Bit 1 */
+	buff[0] |= Keyboard_Data->L_SHIFT   << 1;	/* Bit 1 */
 	buff[0] |= Keyboard_Data->L_ALT 	<< 2;	/* Bit 2 */
 	buff[0] |= Keyboard_Data->L_GUI 	<< 3;	/* Bit 3 */
 	buff[0] |= Keyboard_Data->R_CTRL 	<< 4;	/* Bit 4 */
-	buff[0] |= Keyboard_Data->R_SHIFT << 5;	/* Bit 5 */
+	buff[0] |= Keyboard_Data->R_SHIFT   << 5;	/* Bit 5 */
 	buff[0] |= Keyboard_Data->R_ALT 	<< 6;	/* Bit 6 */
 	buff[0] |= Keyboard_Data->R_GUI 	<< 7;	/* Bit 7 */
 	
