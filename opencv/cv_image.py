@@ -17,9 +17,17 @@ def angle_cos(p0, p1, p2):
     return abs(np.dot(d1, d2) / np.sqrt(np.dot(d1, d1) * np.dot(d2, d2)))
 
 
+def normalize_rect(rect):
+    pol_sq = np.array([[d[0][0] for d in cv2.cartToPolar(float(x), float(y))] for x, y in rect])
+    sorted_indices = np.lexsort((pol_sq[:, 1], pol_sq[:, 0]))
+    pol_sq = pol_sq[sorted_indices]
+    ordered_square = np.array([[d[0][0] for d in cv2.polarToCart(m, a)] for m, a in pol_sq], dtype=np.float32)
+    return ordered_square
+
+
 def find_squares_it(blured_img, min_area, max_area):
     for gray in cv2.split(blured_img):
-        for thrs in xrange(2, 128, 2):
+        for thrs in xrange(24, 64, 3):
             if thrs == 0:
                 bin_img = cv2.Canny(gray, 0, 50, apertureSize=5)
                 bin_img = cv2.dilate(bin_img, None)
@@ -36,14 +44,17 @@ def find_squares_it(blured_img, min_area, max_area):
                             cnt = cnt.reshape(-1, 2)
                             max_cos = np.max([angle_cos(cnt[i], cnt[(i + 1) % 4], cnt[(i + 2) % 4]) for i in xrange(4)])
                             if max_cos < 0.05:
-                                yield cnt, area
+                                y1, y2, y3, y4 = np.sort(cnt[:, 1])
+                                if abs(y1 - y2) <= 25 and abs(y3 - y4) <= 25:
+                                    yield normalize_rect(cnt), area
 
 
 def normalize_color_image(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.blur(gray, ksize=(5, 5))
-    # gray = cv2.equalizeHist(gray)
-    return gray
+    gray = cv2.blur(gray, ksize=(3, 3))
+    black = (gray - gray.min()).astype(np.uint8)
+    white = (black * (255.0 / black.max())).astype(np.uint8)
+    return white
 
 
 def get_screen_transform(frame):
@@ -56,15 +67,9 @@ def get_screen_transform(frame):
                                              max_area=0.75 * resized_square)]
     if len(squares) == 0:
         cv2.imshow('No squares', processed)
-        return
+        return None, resized
     avg_square = (sum(squares) / len(squares)).astype(np.float32)
-    pol_sq = np.array([[d[0][0] for d in cv2.cartToPolar(float(x), float(y))] for x, y in avg_square])
-    sorted_indices = np.lexsort((pol_sq[:, 1], pol_sq[:, 0]))
-    pol_sq = pol_sq[sorted_indices]
-    ordered_square = np.array([[d[0][0] for d in cv2.polarToCart(m, a)] for m, a in pol_sq], dtype=np.float32)
-
-    cv2.drawContours(resized, [np.around(ordered_square).astype(int)], contourIdx=-1, color=(0, 255, 0), thickness=1)
-    cv2.imshow('Squares', resized)
+    cv2.drawContours(resized, [np.around(avg_square).astype(int)], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
     base_screen = np.array([
         (0, 0),
@@ -73,7 +78,7 @@ def get_screen_transform(frame):
         (SCREEN_WIDTH, SCREEN_HEIGHT),
     ], dtype=np.float32)
 
-    return cv2.getPerspectiveTransform(ordered_square / SCALE_FACTOR, base_screen)
+    return cv2.getPerspectiveTransform(base_screen, avg_square / SCALE_FACTOR), resized
 
 
 def get_lock_image_square(img, lock_found_threshold=0.96,
@@ -86,14 +91,21 @@ def get_lock_image_square(img, lock_found_threshold=0.96,
 
 
 def process_image(frame):
-    trans = get_screen_transform(frame)
-    if trans is None:
+    trans_matrix, squares = get_screen_transform(frame)
+    if trans_matrix is None:
         return
-    transformed = cv2.warpPerspective(frame, trans, dsize=(SCREEN_WIDTH, SCREEN_HEIGHT))
+    transformed = cv2.warpPerspective(frame, trans_matrix, dsize=(SCREEN_WIDTH, SCREEN_HEIGHT), flags=cv2.WARP_INVERSE_MAP)
     # transformed = frame
     lock_rect = get_lock_image_square(transformed)
     if lock_rect is not None:
         cv2.rectangle(transformed, *lock_rect, color=(0, 0, 255))
+        np_lock = np.array(lock_rect, dtype=np.float32).reshape(1, -1, 2)
+        lock_rect_in_screen = (cv2.perspectiveTransform(np_lock, trans_matrix).reshape(-1, 2) / 2).astype(int)
+        cv2.rectangle(squares,
+                      pt1=tuple(lock_rect_in_screen[0]),
+                      pt2=tuple(lock_rect_in_screen[1]),
+                      color=(0, 0, 255))
+    cv2.imshow('Squares', squares)
     cv2.imshow('Transformed', transformed)
 
 
