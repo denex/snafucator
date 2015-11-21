@@ -1,8 +1,10 @@
 from __future__ import division
 
+import os
+import operator
+
 import cv2
 import numpy as np
-import operator
 
 from process_video import infinite_read_video_from
 
@@ -10,6 +12,14 @@ from process_video import infinite_read_video_from
 SCALE_FACTOR = 1 / 2
 SCREEN_WIDTH = 720
 SCREEN_HEIGHT = 450
+
+BASE_PATH = os.path.split(__file__)[0]
+LOCK_IMAGE = cv2.imread(os.path.join(BASE_PATH, "Lock.png"), flags=cv2.IMREAD_GRAYSCALE)
+assert LOCK_IMAGE is not None, "Can not load Lock.png"
+EMPTY_IMAGE = cv2.imread(os.path.join(BASE_PATH, "Empty.png"), flags=cv2.IMREAD_GRAYSCALE)
+assert EMPTY_IMAGE is not None, "Can not load Empty.png"
+PIN_ENTERED_IMAGE = cv2.imread(os.path.join(BASE_PATH, "4digits.png"), flags=cv2.IMREAD_GRAYSCALE)
+assert PIN_ENTERED_IMAGE is not None, "Can not load 4digits.png"
 
 
 def angle_cos(p0, p1, p2):
@@ -27,7 +37,7 @@ def normalize_rect(rect):
 
 def find_squares_it(blured_img, min_area, max_area):
     for gray in cv2.split(blured_img):
-        for thrs in xrange(24, 64, 3):
+        for thrs in xrange(24, 128, 3):
             if thrs == 0:
                 bin_img = cv2.Canny(gray, 0, 50, apertureSize=5)
                 bin_img = cv2.dilate(bin_img, None)
@@ -49,12 +59,16 @@ def find_squares_it(blured_img, min_area, max_area):
                                     yield normalize_rect(cnt), area
 
 
-def normalize_color_image(frame):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+def normalize_gray_image(gray):
     gray = cv2.blur(gray, ksize=(3, 3))
     black = (gray - gray.min()).astype(np.uint8)
     white = (black * (255.0 / black.max())).astype(np.uint8)
     return white
+
+
+def normalize_color_image(frame):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    return normalize_gray_image(gray)
 
 
 def get_screen_transform(frame):
@@ -66,7 +80,6 @@ def get_screen_transform(frame):
                                              min_area=0.25 * resized_square,
                                              max_area=0.75 * resized_square)]
     if len(squares) == 0:
-        cv2.imshow('No squares', processed)
         return None, resized
     avg_square = (sum(squares) / len(squares)).astype(np.float32)
     cv2.drawContours(resized, [np.around(avg_square).astype(int)], contourIdx=-1, color=(0, 255, 0), thickness=1)
@@ -81,22 +94,23 @@ def get_screen_transform(frame):
     return cv2.getPerspectiveTransform(base_screen, avg_square / SCALE_FACTOR), resized
 
 
-def get_lock_image_square(img, lock_found_threshold=0.96,
-                          lock_image=cv2.imread("Lock.png")):
-    found = cv2.matchTemplate(img, lock_image, method=cv2.TM_CCORR_NORMED)
+def find_image_on_screen(screen, image, found_threshold):
+    found = cv2.matchTemplate(screen, image, method=cv2.TM_CCORR_NORMED)
     min_val, max_val, min_pos, max_pos = cv2.minMaxLoc(found)
-    if max_val < lock_found_threshold:
+    if max_val < found_threshold:
         return None
-    return max_pos, (max_pos[0] + lock_image.shape[1], max_pos[1]+lock_image.shape[0])
+    return max_pos, (max_pos[0] + image.shape[1], max_pos[1] + image.shape[0])
 
 
 def process_image(frame):
     trans_matrix, squares = get_screen_transform(frame)
     if trans_matrix is None:
         return
-    transformed = cv2.warpPerspective(frame, trans_matrix, dsize=(SCREEN_WIDTH, SCREEN_HEIGHT), flags=cv2.WARP_INVERSE_MAP)
-    # transformed = frame
-    lock_rect = get_lock_image_square(transformed)
+    transformed = cv2.warpPerspective(frame, trans_matrix,
+                                      dsize=(SCREEN_WIDTH, SCREEN_HEIGHT),
+                                      flags=cv2.WARP_INVERSE_MAP)
+    transformed_norm = normalize_color_image(transformed)
+    lock_rect = find_image_on_screen(transformed_norm, LOCK_IMAGE, 0.95)
     if lock_rect is not None:
         cv2.rectangle(transformed, *lock_rect, color=(0, 0, 255))
         np_lock = np.array(lock_rect, dtype=np.float32).reshape(1, -1, 2)

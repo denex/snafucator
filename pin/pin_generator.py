@@ -16,17 +16,23 @@ PINS = tuple(_create_pins())
 assert len(PINS) == 10000, "Len = %d" % len(PINS)
 
 
+def get_pin_index(pin):
+    return PINS.index(pin)
+
+
 def pin_generator(last_pin=None):
     """
     :type last_pin: int
     :rtype: Iterable[int]
     """
-    start_pos = PINS.index(last_pin) + 1 if last_pin is not None else 0
+    start_pos = get_pin_index(last_pin) + 1 if last_pin is not None else 0
     for i in xrange(start_pos, len(PINS)):
         yield PINS[i]
 
 
 def test_selector():
+    print get_pin_index(6000)
+
     l1 = list(pin_generator(last_pin=9997))
     assert len(frozenset(l1)) == 4
 

@@ -45,25 +45,19 @@ def write_camera_to(out_filename):
                     break
 
 
-def read_video_generator(filename, sleep=None):
+def read_video_generator(filename):
     key = 0
     while not is_user_wants_to_quit(key):
         with video_capture(filename) as video:
-            fps = video.get(cv2.CAP_PROP_FPS) or 10
-            sleep_time = int(round(1000.0 / fps))
             while video.isOpened():
                 ret, frame = video.read()
                 if not ret:
                     break
-
                 yield frame
-                key = cv2.waitKey(sleep or sleep_time)
-                if is_user_wants_to_quit(key):
-                    break
 
 
-def infinite_read_video_from(filename, on_new_frame=None, sleep=None):
-    for frame in read_video_generator(filename=filename, sleep=sleep):
+def infinite_read_video_from(filename, on_new_frame=None):
+    for frame in read_video_generator(filename=filename):
         if on_new_frame is not None:
             on_new_frame(frame)
         else:
