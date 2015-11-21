@@ -188,9 +188,9 @@ int main(void)
 			BSP_LED_On(LED_ORANGE);
 			
 			/* Send keyboard report */
-			uint8_t sended = sendKeyboardChar(aRxBuffer.Char, 100);
+			uint8_t sended = sendKeyboardChar(aRxBuffer.Char, 150);
 			
-			if (HAL_UART_Transmit(&huart2, &sended, sizeof(sended), 1000) != HAL_OK) {
+			if (HAL_UART_Transmit(&huart2, &sended, sizeof(sended), 5000) != HAL_OK) {
 				fail(5);
 				break;
 			}
