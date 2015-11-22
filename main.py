@@ -50,7 +50,7 @@ def try_pin(pin, keyboard, camera):
                       pt2=tuple(lock_rect_on_frame[1]),
                       color=(0, 0, 255))
         cv2.imshow('Square', img_w_square)
-        pin_already_entered_rect = Image.find_image_on_screen(screen_norm, Image.PIN_ENTERED_IMAGE, 0.9935)
+        pin_already_entered_rect = Image.find_image_on_screen(screen_norm, Image.PIN_ENTERED_IMAGE, 0.9955)
         if pin_already_entered_rect is not None:
             pin_already_entered_rect_on_frame = transform_rect(pin_already_entered_rect, trans_matrix)
             cv2.rectangle(img_w_square,
@@ -59,7 +59,7 @@ def try_pin(pin, keyboard, camera):
                           color=(0, 0, 255))
             cv2.imshow('Already entered', img_w_square)
             continue
-        empty_pin_rect = Image.find_image_on_screen(screen_norm, Image.EMPTY_IMAGE, found_threshold=0.994)
+        empty_pin_rect = Image.find_image_on_screen(screen_norm, Image.EMPTY_IMAGE, found_threshold=0.9935)
         if empty_pin_rect is None:
             cv2.imshow('Not empty', screen_norm)
             continue
@@ -93,20 +93,26 @@ def try_pin(pin, keyboard, camera):
                                    dsize=(Image.SCREEN_WIDTH, Image.SCREEN_HEIGHT),
                                    flags=cv2.WARP_INVERSE_MAP)
         screen_norm = Image.normalize_color_image(scrn)
-        pin_entered = Image.find_image_on_screen(screen_norm, Image.PIN_ENTERED_IMAGE, found_threshold=0.995)
+        pin_entered = Image.find_image_on_screen(screen_norm, Image.PIN_ENTERED_IMAGE, found_threshold=0.994)
         if pin_entered is None:
             cv2.imshow('No entered yet', screen_norm)
             continue
         keyboard.send_key('\n')
-        cv_sleep(0.3)
         message = "entered"
         logging.warning(message)
         print(message, file=sys.stderr)
+        cv_sleep(0.3)
+        entered_rect = transform_rect(pin_entered, trans_matrix2)
+        cv2.rectangle(img_w_square,
+                      pt1=tuple(entered_rect[0]),
+                      pt2=tuple(entered_rect[1]),
+                      color=(0, 255, 0))
+        cv2.imshow("entered", img_w_square)
         break
     return False
 
 
-LAST_PIN = 6020
+LAST_PIN = 2719
 
 
 def main():
@@ -127,6 +133,6 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename=datetime.strftime(datetime.now(), '%Y-%d-%m-%H-%M-%S.log'),
+    logging.basicConfig(filename=datetime.strftime(datetime.now(), '%Y-%m-%d_%H-%M-%S.log'),
                         format='%(asctime)s: %(message)s')
     main()

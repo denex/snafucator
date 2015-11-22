@@ -37,7 +37,7 @@ def normalize_rect(rect):
 
 def find_squares_it(blured_img, min_area, max_area):
     for gray in cv2.split(blured_img):
-        for thrs in xrange(24, 128, 3):
+        for thrs in xrange(16, 192, 2):
             if thrs == 0:
                 bin_img = cv2.Canny(gray, 0, 50, apertureSize=5)
                 bin_img = cv2.dilate(bin_img, None)
@@ -105,6 +105,7 @@ def find_image_on_screen(screen, image, found_threshold):
 def process_image(frame):
     trans_matrix, squares = get_screen_transform(frame)
     if trans_matrix is None:
+        cv2.imshow('Squares', squares)
         return
     transformed = cv2.warpPerspective(frame, trans_matrix,
                                       dsize=(SCREEN_WIDTH, SCREEN_HEIGHT),
@@ -112,6 +113,8 @@ def process_image(frame):
     transformed_norm = normalize_color_image(transformed)
     lock_rect = find_image_on_screen(transformed_norm, LOCK_IMAGE, 0.95)
     if lock_rect is not None:
+        # cv2.imshow("Lock", transformed_norm)
+        # cv2.waitKey(60000)
         cv2.rectangle(transformed, *lock_rect, color=(0, 0, 255))
         np_lock = np.array(lock_rect, dtype=np.float32).reshape(1, -1, 2)
         lock_rect_in_screen = (cv2.perspectiveTransform(np_lock, trans_matrix).reshape(-1, 2) / 2).astype(int)

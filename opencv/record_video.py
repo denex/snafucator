@@ -58,6 +58,7 @@ def read_video_generator(filename):
 
 def infinite_read_video_from(filename, on_new_frame=None):
     for frame in read_video_generator(filename=filename):
+        cv2.waitKey(100)
         if on_new_frame is not None:
             on_new_frame(frame)
         else:

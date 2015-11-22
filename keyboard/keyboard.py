@@ -13,10 +13,10 @@ class Keyboard:
         """
         :rtype: Keyboard
         """
-        self._telnet = Telnet(host=self._host, port=self._port)
+        self._telnet = Telnet(host=self._host, port=self._port, timeout=5.0)
         welcome = self._telnet.read_some()
         logging.debug("Telnet: Welcome: " + welcome)
-        assert welcome == 'ser2net port 1235 device /dev/ttyAMA0 [115200 N81]'
+        assert welcome == 'ser2net port 1235 device /dev/ttyAMA0 [115200 N81]', welcome
         time.sleep(1.0)
         second_line = self._telnet.read_some()
         assert second_line == ' (Debian GNU/Linux)'

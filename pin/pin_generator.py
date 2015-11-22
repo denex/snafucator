@@ -14,6 +14,8 @@ def _create_pins():
 
 PINS = tuple(_create_pins())
 assert len(PINS) == 10000, "Len = %d" % len(PINS)
+assert min(PINS) == 0000
+assert max(PINS) == 9999
 
 
 def get_pin_index(pin):
