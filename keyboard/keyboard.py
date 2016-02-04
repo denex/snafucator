@@ -1,5 +1,6 @@
 from __future__ import division, print_function, unicode_literals
 import logging
+import socket
 from telnetlib import Telnet
 import time
 
@@ -13,7 +14,10 @@ class Keyboard:
         """
         :rtype: Keyboard
         """
-        self._telnet = Telnet(host=self._host, port=self._port, timeout=5.0)
+        try:
+            self._telnet = Telnet(host=self._host, port=self._port, timeout=5.0)
+        except socket.error as se:
+            raise socket.error("Cannot connect to %s:%d. %s" % (self._host, self._port, se.message or se.strerror))
         welcome = self._telnet.read_some()
         logging.debug("Telnet: Welcome: " + welcome)
         assert welcome == 'ser2net port 1235 device /dev/ttyAMA0 [115200 N81]', welcome

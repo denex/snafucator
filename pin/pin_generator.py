@@ -19,12 +19,12 @@ assert max(PINS) == 9999
 
 
 def get_pin_index(pin):
-    return PINS.index(pin)
+    return 0 if pin is None else PINS.index(pin)
 
 
 def pin_generator(last_pin=None):
     """
-    :type last_pin: int
+    :type last_pin: int or None
     :rtype: Iterable[int]
     """
     start_pos = get_pin_index(last_pin) + 1 if last_pin is not None else 0

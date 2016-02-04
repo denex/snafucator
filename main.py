@@ -14,12 +14,24 @@ from opencv import cv_image as Image
 
 
 def cv_sleep(seconds):
+    """
+    Process events in OpenCV
+
+    :type seconds: float or int
+    """
     start_time = time.time()
     while time.time() - start_time < seconds:
         cv2.waitKey(int(1000 * seconds))
 
 
 def transform_rect(points, trans_matrix):
+    """
+    Transform points perspective with trans_matrix
+
+    :type points: np.array
+    :type trans_matrix: np.array
+    :rtype: np.array
+    """
     np_lock = np.array(points, dtype=np.float32).reshape(1, -1, 2)
     transformed = (cv2.perspectiveTransform(np_lock, trans_matrix).reshape(-1, 2) / 2).astype(int)
     return transformed
@@ -97,11 +109,14 @@ def try_pin(pin, keyboard, camera):
         if pin_entered is None:
             cv2.imshow('No entered yet', screen_norm)
             continue
+
         keyboard.send_key('\n')
         message = "entered"
         logging.warning(message)
         print(message, file=sys.stderr)
         cv_sleep(0.3)
+        keyboard.send_key('\n')
+
         entered_rect = transform_rect(pin_entered, trans_matrix2)
         cv2.rectangle(img_w_square,
                       pt1=tuple(entered_rect[0]),
@@ -112,7 +127,7 @@ def try_pin(pin, keyboard, camera):
     return False
 
 
-LAST_PIN = 2719
+LAST_PIN = None
 
 
 def main():
