@@ -1,5 +1,4 @@
 from __future__ import division, print_function
-import os
 from contextlib import contextmanager
 
 import cv2
@@ -23,6 +22,7 @@ def video_writer(filename, width, height, fps=10.0):
 
 @contextmanager
 def video_capture(filename=0):
+    # noinspection PyArgumentList
     capture = cv2.VideoCapture(filename)
     assert capture.isOpened(), "Cannot open %s" % str(filename)
     yield capture

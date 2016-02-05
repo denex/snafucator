@@ -47,11 +47,12 @@ class Keyboard:
         str_to_write = b'0' + str(key) + b'00'
         return self._send_packet(str_to_write) == key
 
+    # noinspection PyUnusedLocal
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._telnet.close()
 
 
-def main():
+def test():
     keys = b'1234\n'
     with Keyboard() as keyboard:
         for key in keys:
@@ -60,4 +61,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    test()

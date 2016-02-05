@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, unicode_literals
 
 import os
 import operator
@@ -6,7 +6,7 @@ import operator
 import cv2
 import numpy as np
 
-from process_video import infinite_read_video_from
+from record_video import infinite_read_video_from
 
 
 SCALE_FACTOR = 1 / 2
@@ -62,6 +62,7 @@ def find_squares_it(blured_img, min_area, max_area):
 def normalize_gray_image(gray):
     gray = cv2.blur(gray, ksize=(3, 3))
     black = (gray - gray.min()).astype(np.uint8)
+    # noinspection PyUnresolvedReferences
     white = (black * (255.0 / black.max())).astype(np.uint8)
     return white
 
@@ -81,6 +82,7 @@ def get_screen_transform(frame):
                                              max_area=0.75 * resized_square)]
     if len(squares) == 0:
         return None, resized
+    # noinspection PyUnresolvedReferences
     avg_square = (sum(squares) / len(squares)).astype(np.float32)
     cv2.drawContours(resized, [np.around(avg_square).astype(int)], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
@@ -105,7 +107,7 @@ def find_image_on_screen(screen, image, found_threshold):
 def process_image(frame):
     trans_matrix, squares = get_screen_transform(frame)
     if trans_matrix is None:
-        cv2.imshow('Squares', squares)
+        cv2.imshow("No transformation matrix", squares)
         return
     transformed = cv2.warpPerspective(frame, trans_matrix,
                                       dsize=(SCREEN_WIDTH, SCREEN_HEIGHT),
@@ -113,10 +115,10 @@ def process_image(frame):
     transformed_norm = normalize_color_image(transformed)
     lock_rect = find_image_on_screen(transformed_norm, LOCK_IMAGE, 0.95)
     if lock_rect is not None:
-        # cv2.imshow("Lock", transformed_norm)
-        # cv2.waitKey(60000)
         cv2.rectangle(transformed, *lock_rect, color=(0, 0, 255))
+        # noinspection PyArgumentList
         np_lock = np.array(lock_rect, dtype=np.float32).reshape(1, -1, 2)
+        # noinspection PyUnresolvedReferences
         lock_rect_in_screen = (cv2.perspectiveTransform(np_lock, trans_matrix).reshape(-1, 2) / 2).astype(int)
         cv2.rectangle(squares,
                       pt1=tuple(lock_rect_in_screen[0]),

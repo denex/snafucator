@@ -4,13 +4,14 @@ import time
 import logging
 from datetime import datetime
 
+# brew install opencv3 --with-ffmpeg --with-opengl --with-qt5 --without-numpy --without-opencl
 import cv2
 import numpy as np
 
-from keyboard import Keyboard
+# noinspection PyPep8Naming
+from opencv import cv_image as Image, record_video as Camera
 from pin import pin_generator, get_pin_index
-from opencv import record_video as Camera
-from opencv import cv_image as Image
+from keyboard import Keyboard
 
 
 def cv_sleep(seconds):
@@ -32,7 +33,9 @@ def transform_rect(points, trans_matrix):
     :type trans_matrix: np.array
     :rtype: np.array
     """
+    # noinspection PyArgumentList
     np_lock = np.array(points, dtype=np.float32).reshape(1, -1, 2)
+    # noinspection PyUnresolvedReferences
     transformed = (cv2.perspectiveTransform(np_lock, trans_matrix).reshape(-1, 2) / 2).astype(int)
     return transformed
 
@@ -148,6 +151,7 @@ def main():
 
 
 if __name__ == '__main__':
+    # noinspection PyTypeChecker
     logging.basicConfig(filename=datetime.strftime(datetime.now(), '%Y-%m-%d_%H-%M-%S.log'),
                         format='%(asctime)s: %(message)s')
     main()
