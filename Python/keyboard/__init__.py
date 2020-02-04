@@ -1,2 +1,3 @@
-from __future__ import division, print_function, unicode_literals
-from keyboard import Keyboard
+from .keyboard import Keyboard
+
+ALL = (Keyboard.__name__,)

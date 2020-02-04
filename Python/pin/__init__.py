@@ -1,4 +1,6 @@
-from __future__ import division, print_function, unicode_literals
+from .pin_generator import get_pin_index, pin_generator
 
-from pin_generator import pin_generator
-from pin_generator import get_pin_index
+ALL = (
+    get_pin_index.__name__,
+    pin_generator.__name__,
+)

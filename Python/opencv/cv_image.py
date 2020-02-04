@@ -1,13 +1,10 @@
-from __future__ import division, unicode_literals
-
 import os
 import operator
 
 import cv2
 import numpy as np
 
-from record_video import infinite_read_video_from
-
+from .record_video import infinite_read_video_from
 
 SCALE_FACTOR = 1 / 2
 SCREEN_WIDTH = 720
